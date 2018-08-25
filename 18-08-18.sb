@@ -1,0 +1,1456 @@
+'___________________MOTORES_____________
+Sensor.SetMode(1,0)
+Sensor.SetMode(2,0)
+Sensor.SetMode(3,0)
+Sensor.SetMode(4,0)
+Motor.Invert("AB")
+
+'___________________VARIABLES_____________
+contenedor1="FALSE"
+contenedor2="FALSE"
+contenedor3="FALSE"
+contenedor4="FALSE"
+kp=1.2
+kd=6
+errold=0
+targetd=30 '2
+targeti=43 '3  46
+grados=0
+pot=0
+avance=0
+Red=0
+Green=0
+Blue=0 
+barco=0
+barco1=0
+barco2=0
+barco3=0
+lectura_pieza=0
+Garra="TRUE"
+pos_cont=0
+time = 0
+pos_barco=0
+primerB=0
+con_1="FALSE"
+con_2="FALSE"
+con_3="FALSE"
+adelante="FALSE"
+'___________________SEGUIDORES_____________
+Sub segizqg
+  Motor.ResetCount("B")
+  While(Motor.GetCount("B")<grados)
+    err=Sensor.ReadPercent(3) - targeti
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub segderg
+  Motor.ResetCount("B")
+  While(Motor.GetCount("B")<grados)
+    err=targetd - Sensor.ReadPercent(2)
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub segder
+  While Sensor.ReadPercent(3)>targeti
+    err=targetd - Sensor.ReadPercent(2)
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub segizq
+  While Sensor.ReadPercent(2)>targetd
+    err=Sensor.ReadPercent(3) - targeti
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub seg2grad
+  Motor.ResetCount("B")
+  While Motor.GetCount("B")<grados
+    err=(Sensor.ReadPercent(2)+20)-Sensor.ReadPercent(3)
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub seg2
+  While Sensor.ReadPercent(2)>targeti or Sensor.ReadPercent(3)>targetd
+    err=(Sensor.ReadPercent(2)+20)-Sensor.ReadPercent(3)
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub segbarco
+  While Sensor.ReadRawValue(4,0) = 0
+    err=Sensor.ReadPercent(3) - targeti
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub segvacio
+  While Sensor.ReadRawValue(4,0) <> 0
+    err=Sensor.ReadPercent(3) - targeti
+    u=kp*err+(err-errold)*kd
+    Motor.StartPower("B",pot-u)
+    Motor.StartPower("C",pot+u)
+    Program.Delay(1)
+    errold=err
+  EndWhile
+EndSub
+
+'__________________________________________________
+
+Sub superstop
+  Motor.Start("BC",-100)
+  Program.Delay(10)
+  Motor.Stop("BC","TRUE")
+EndSub
+
+'______________________GIROS______________________
+
+Sub giro2m3
+  While Sensor.ReadPercent(3) > targeti
+    Motor.StartSync("BC",pot, -(pot))
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giro2m2
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartSync("BC",pot, -(pot))
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giro2mgrad
+  Motor.ResetCount("B")
+  While math.Abs(Motor.GetCount("B")) < grados
+    Motor.StartSync("BC",pot, -(pot))
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromder3
+  While Sensor.ReadPercent(3) > targeti
+    Motor.StartPower("C",pot)
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromDerGrad
+  Motor.ResetCount("C")
+  While math.Abs(Motor.GetCount("C")) < grados
+    Motor.StartPower("C",pot)
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromIzqGrad
+  Motor.ResetCount("B")
+  While Math.Abs(Motor.GetCount("B")) < grados
+    Motor.StartPower("B",pot)
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromder2
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("C",pot)
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromizq3
+  While Sensor.ReadPercent(3) > targeti
+    Motor.StartPower("B",pot)
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub giromizq2
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",pot)
+  EndWhile
+EndSub
+
+'____________________Garra___________________
+
+Sub SubirGarra
+  Motor.StartPower("D",80)
+  Program.Delay(625)
+  Motor.Stop("D","TRUE")
+EndSub
+
+Sub BajarGarra
+  Motor.StartPower("D",-80)
+  Program.Delay(625)
+  Motor.Stop("D","TRUE")
+EndSub
+
+Sub DetenerGarra
+  While "TRUE"
+    If Garra="TRUE" Then
+      Motor.Start("D",-1)
+    Else
+    EndIf
+  EndWhile
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub Abrir_Comida
+  Motor.StartPower("A",30)
+  Program.Delay(500)
+  Motor.Stop("A","TRUE")
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub Cerrar_Comida
+  Motor.StartPower("A",-70)
+  Program.Delay(400)
+  Motor.Stop("A","TRUE")
+  Motor.MovePower("A",20,10,"TRUE")
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub LecturaPiezas
+  valor = Sensor.ReadRawValue(1,0)
+  If valor=4 Or valor=13 Then
+    color=3
+  ElseIf valor=2 or valor=3 Then
+    color=2
+  ElseIf valor=5 or valor=6 Then
+    color=4
+  Else
+    color=5
+  EndIf
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub lecturabarco
+  lectura_pieza=Sensor.ReadRawValue(4,0)
+  If lectura_pieza=2 Or lectura_pieza=3 Or lectura_pieza=4 Then
+    Sensor.SetMode(4,4)
+    R=Sensor.ReadRaw(4,2)
+    If lectura_pieza=2 Then 
+      barco=2
+      Sensor.SetMode(4,0)
+    ElseIf lectura_pieza=4 Then
+      barco=3
+      Sensor.SetMode(4,0)
+    Else
+      Sensor.SetMode(4,4)
+      R=Sensor.ReadRaw(4,2)
+      If R[2] > 80 Then
+        barco=2
+      Else
+        barco=3
+      EndIf
+      Sensor.SetMode(4,0)
+    EndIf
+  ElseIf lectura_pieza=5 Or lectura_pieza=6 Then
+    barco=4
+  ElseIf lectura_pieza=10 or lectura_pieza=9 or lectura_pieza=8 or lectura_pieza=7 Then
+    barco=5
+  EndIf
+  Sensor.SetMode(4,0)
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub DejarBarcos
+  pot=-50
+  If pos_barco=6 Then
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    
+    Motor.MovePower("B",70,1000,"TRUE")
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+    
+    Motor.StartPower("BC",-80)
+    Program.Delay(750)
+    Motor.StartPower("BC",-40)
+    Program.Delay(300)
+    Motor.Stop("BC","TRUE")
+    
+    Motor.MovePower("B",70,530,"TRUE")
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+  Else
+    If pos_barco = 1 Then
+      Motor.MovePower("BC",70,90,"TRUE")
+    EndIf
+    Motor.Stop("BC","TRUE")
+    if barco=2 Then
+      Motor.MovePower("BC",70,20,"TRUE")  '50
+    EndIf
+    if barco=3 Then
+      Motor.MovePower("BC",70,20,"TRUE")  '50
+    EndIf
+    if barco=4 Then
+      Motor.MovePower("BC",70,50,"TRUE")  '50
+    EndIf
+    if barco=5 Then
+      Motor.MovePower("BC",70,50,"TRUE")  '50
+    EndIf
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("B",70,170,"TRUE") 
+    Else 
+      Motor.MovePower("B",70,180,"TRUE") 
+    EndIf
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+    Motor.MovePower("C",70,200,"TRUE")
+    Motor.Stop("C","TRUE")
+    Program.Delay(200)
+    Motor.MovePower("B",-70,555,"TRUE") '590
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+  EndIf
+  Motor.StartPower("BC",65)
+  Program.Delay(350) '750
+  'Motor.Stop("BC","FALSE")
+  
+  Abrir_Comida()
+  
+  'Program.Delay(100) '1300
+  Motor.Stop("BC","TRUE")
+  
+  Motor.MovePower("BC",-50,120,"FALSE")
+  
+  Motor.StartPower("D",-40)
+  Program.Delay(700)
+  Motor.Stop("D","TRUE")
+  
+  Motor.MoveSync("BC",-50,-40,140,"TRUE")
+  Motor.Stop("BC","TRUE")
+  Motor.StartPower("D",50)
+  Program.Delay(800)
+  Motor.Stop("D","TRUE")
+EndSub
+
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub RecorridoBarcosYBarcos
+  pot=50
+  grados=300
+  Motor.StartPower("BC",-100)
+  Program.Delay(500)
+  Motor.Stop("BC","TRUE")
+  If color=2 Or color=4 Then
+    Motor.MovePower("B",70,600,"TRUE")
+    Motor.StartPower("B",70)
+    Program.Delay(250)
+    Motor.Stop("B","FALSE")
+    
+    grados=100
+    Motor.ResetCount("B")
+    While Motor.GetCount("B") < grados 
+      Motor.StartPower("B",95)
+      Motor.StartPower("C",80)
+    EndWhile
+    
+    While Sensor.ReadPercent(3) > targeti
+      Motor.StartPower("B",95)
+      Motor.StartPower("C",90)
+    EndWhile
+    
+    grados=10
+    Motor.ResetCount("C")
+    While Motor.GetCount("C") < grados 
+      Motor.StartPower("B",90)
+      Motor.StartPower("C",95)
+    EndWhile
+    
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    'Motor.MovePower("BC",80,20,"TRUE") 'marcador1 
+  Else
+    Motor.MovePower("C",70,600,"TRUE")
+    Motor.StartPower("C",70)
+    Program.Delay(250)
+    Motor.Stop("C","FALSE")
+    
+    grados=100
+    Motor.ResetCount("C")
+    While Motor.GetCount("C") < grados 
+      Motor.StartPower("B",90)
+      Motor.StartPower("C",95)
+    EndWhile
+    
+    grados=100
+    Motor.ResetCount("C")
+    While Motor.GetCount("C") < grados 
+      Motor.StartPower("B",90)
+      Motor.StartPower("C",95)
+    EndWhile
+    
+    While Sensor.ReadPercent(2) > targetd
+      Motor.StartPower("B",80)
+      Motor.StartPower("C",90)
+    EndWhile
+  EndIf
+  
+  
+  If color=2 Or color=4 Then
+    pot=-20
+    grados=180
+    giro2mgrad()
+    pot=-20
+    giro2m3() '2
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    pot=90 '90
+    errold=0
+    err=0
+    grados=1000 '250
+    seg2grad()
+    
+    pot=50
+    seg2()
+    superstop()
+    pot=40
+    grados=370
+    Motor.ResetCount("B")
+    While Motor.GetCount("B") < grados 
+      Motor.StartPower("B",75)
+      Motor.StartPower("C",-40)
+    EndWhile
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+  EndIf
+  
+  grados=600
+  Motor.ResetCount("C")
+  While Motor.GetCount("C") < grados 
+    Motor.StartPower("B",85)
+    Motor.StartPower("C",95)
+  EndWhile
+  
+  grados=60
+  Motor.ResetCount("B")
+  While Motor.GetCount("B") < grados 
+    Motor.StartPower("B",95)
+    Motor.StartPower("C",85)
+  EndWhile
+  
+  Speaker.Note(100,"C4",2000)
+  While Sensor.ReadPercent(2) > targetd And Sensor.ReadPercent(3) > targeti
+    Motor.StartPower("B",40)
+    Motor.StartPower("C",40)
+  EndWhile
+  
+  If con_1 = "FALSE" And primerB = color Then
+    If con_2="TRUE" Or con_3="TRUE" Then
+      pos_barco = 1
+      Motor.StartPower("BC",80)
+      Program.Delay(550) '750
+      'Motor.Stop("BC","FALSE")
+      
+      Abrir_Comida()
+      
+      Program.Delay(100) '1300
+      Motor.Stop("BC","TRUE")
+      
+      Motor.MovePower("BC",-50,120,"FALSE")
+      
+      Motor.StartPower("D",-40)
+      Program.Delay(700)
+      Motor.Stop("D","TRUE")
+      
+      Motor.MoveSync("BC",-50,-40,140,"TRUE")
+      Motor.Stop("BC","TRUE")
+      Motor.StartPower("D",50)
+      Program.Delay(800)
+      Motor.Stop("D","TRUE")
+      pos_barco=1
+    EndIf
+    
+  Else
+    
+    Motor.StartPower("BC",-40)
+    Program.Delay(150)
+    Motor.Stop("BC","TRUE")
+    
+    If EV3.BatteryLevel > 85 Then
+      Motor.MoveSync("BC",-58,-50,135,"TRUE")
+    Else
+      Motor.MoveSync("BC",-58,-50,115,"TRUE")
+    EndIf
+    Motor.Stop("BC","TRUE")
+    Program.Delay(100)
+    Motor.MovePower("B",70,560,"TRUE") '560
+    
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+    
+    Motor.Start("BC",-40)
+    Program.Delay(850)  
+    Motor.Start("BC",40)
+    Program.Delay(100)  
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    
+    '_______________________________________________BARCOS :v
+    Motor.ResetCount("BC")
+    lectura_pieza=Sensor.ReadRawValue(4,0)
+    For i=1 To 3
+      If lectura_pieza <> 0 Then
+        lecturabarco()
+      Else
+        i=3
+      EndIf
+    EndFor
+    
+    If con_1="TRUE" Then
+      primerB = barco
+    EndIf
+    
+    If barco = color Then
+      pos_barco=1
+    Else
+      pot=50
+      err=0
+      errold=0
+      While barco <> color And Motor.GetCount("C") < 1400
+        err=Sensor.ReadPercent(3) - targeti
+        u=kp*err+(err-errold)*kd
+        Motor.StartPower("B",pot-u)
+        Motor.StartPower("C",pot+u)
+        errold=err
+        lecturabarco()
+      EndWhile
+      Speaker.Note(100,"C4",100)
+      avance = Motor.GetCount("C")
+      
+      Motor.StartPower("BC",-70)
+      Program.Delay(100)
+      Motor.Stop("BC","TRUE")
+      
+      If barco <> color Then
+        pos_barco=6
+      Else
+        If avance <= 526 Then
+          pos_barco=2
+        EndIf
+        If avance > 526 And avance <= 853 Then
+          pos_barco=3
+        EndIf
+        If avance > 853 And avance <= 1196 Then
+          pos_barco=4
+        EndIf
+        If avance > 1196 Then
+          pos_barco=5
+        EndIf
+      EndIf
+    EndIf
+    
+    LCD.Clear()
+    LCD.Text(1,30,60,2,pos_barco)
+    
+    DejarBarcos()
+  EndIf
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub Primer_4_2
+  pot=70
+  If con_1="TRUE" Then
+    If contenedor1="TRUE" Then
+      adelante="TRUE"
+    Else
+      adelante="FALSE"
+    EndIf
+  ElseIf con_2="TRUE" Then
+    adelante="FALSE"
+  ElseIF con_3="TRUE" Then
+    If contenedor4="TRUE" Then 
+      adelante="TRUE"
+    Else
+      adelante="FALSE"
+    EndIf
+  EndIf
+  LCD.Clear()
+  LCD.Text(1,30,60,2,adelante)
+  
+  If adelante="TRUE" then 'Tomar Pieza 1 o 2
+    seg2()
+  Else
+    seg2()
+    seg2grad()
+    seg2()
+  EndIf
+  If color=2 Then
+    If EV3.BatteryLevel > 85 Then
+      grados=585
+    Else
+      grados=585
+    EndIf
+    seg2grad()
+    Motor.StartPower("BC",-50)
+    Program.Delay(90)
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+  Else
+    If EV3.BatteryLevel > 85 Then
+      grados=20
+    Else
+      grados=30
+    EndIf
+    seg2grad()
+    Motor.StartPower("BC",-30)
+    Program.Delay(80)
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+  EndIf
+  
+  pot=-70
+  If color=4 Then
+    grados=390 '350
+  Else
+    grados=550
+  EndIf
+  giromDerGrad()
+  Motor.Start("BC",-50)
+  Program.Delay(350)
+  Motor.Stop("BC","TRUE")
+  If color=2 Then
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",50,235,"TRUE") '265
+    Else
+      Motor.MovePower("BC",50,255,"TRUE")
+    EndIf
+  Else
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",50,235,"TRUE") '265
+    Else
+      Motor.MovePower("BC",50,255,"TRUE")
+    EndIf
+  EndIf
+  
+  Motor.StartPower("D",80)
+  Program.Delay(315)
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub RegresoBarcos_1_2
+  If pos_barco=1 Then
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.MovePower("C",50,30,"TRUE")
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.MovePower("C",50,30,"TRUE")
+    Motor.MoveSync("BC",-80,-70,450,"FALSE")
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("C",-80)
+    Program.Delay(1000)
+    Motor.StartPower("BC",-80)
+    Program.Delay(200)
+    Motor.Stop("BC","TRUE")
+    Motor.MovePower("BC",80,1200,"FALSE")
+    Motor.MoveSync("BC",100,50,1150,"FALSE")
+  EndIf
+  If pos_barco=2 Then
+    Motor.MoveSync("BC",-45,-100,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(400)
+    Motor.Stop("BC","TRUE")
+    Motor.MovePower("BC",80,1200,"FALSE")
+    Motor.MoveSync("BC",100,50,1150,"FALSE")
+  EndIf
+  If pos_barco=3 Then
+    Motor.MoveSync("BC",-100,-45,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(1000)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("C",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=4 Then
+    Motor.MoveSync("BC",-100,-45,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(800)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("C",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=5 Then
+    Motor.MoveSync("BC",-100,-45,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(400)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("C",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=6 Then
+    Motor.StartPower("B",-80)
+    Program.Delay(1100)
+    Motor.StartPower("BC",-80)
+    Program.Delay(200)
+    Motor.Stop("B","TRUE")
+    Motor.StartPower("C",80)
+    Program.Delay(950)
+  EndIf
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub RegresoBarcos_3_4
+  If pos_barco=1 Then
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.MovePower("C",50,30,"TRUE")
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.MovePower("C",50,30,"TRUE")
+    Motor.MovePower("B",50,30,"TRUE")
+    Motor.StartPower("C",-80)
+    Program.Delay(900)
+    Motor.StartPower("BC",-80)
+    Program.Delay(200)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("B",80)
+    Program.Delay(850)
+  EndIf
+  If pos_barco=2 Then
+    Motor.MoveSync("BC",-45,-100,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(400)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("B",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=3 Then
+    Motor.MoveSync("BC",-45,-100,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(900)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("B",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=4 Then
+    Motor.MoveSync("BC",-45,-100,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(1000)
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("B",80)
+    Program.Delay(900)
+  EndIf
+  If pos_barco=5 Then
+    Motor.MoveSync("BC",-100,-45,1000,"FALSE")
+    Motor.StartPower("BC",-80)
+    Program.Delay(500) '400 marcador
+    Motor.Stop("BC","TRUE")
+    Motor.MovePower("BC",80,1200,"FALSE")
+    Motor.MoveSync("BC",50,100,850,"FALSE")
+  EndIf
+  If pos_barco=6 Then
+    Motor.MovePower("BC",-80,1000,"FALSE")
+    Motor.Stop("BC","TRUE")
+    Motor.StartPower("B",-80)
+    Program.Delay(900)
+    Motor.StartPower("BC",-80)
+    Program.Delay(470)
+    Motor.Stop("BC","TRUE")
+    Motor.MovePower("BC",80,100,"FALSE")
+    Motor.MoveSync("BC",50,100,950,"FALSE")
+  EndIf
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub Contenedor_1_2Color_3_5
+  If color=3 Or color=5 Then
+    Motor.MovePower("BC",70,120,"TRUE") '100 'marcador5
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    pot=50
+    giro2m2()
+    Motor.Stop("BC","TRUE")
+    
+    Program.Delay(100)
+    pot=80
+    seg2()
+    grados=240 '230
+    seg2grad()
+    Motor.Stop("BC","TRUE")
+    Program.Delay(100)
+    err=0
+    errold=0
+  EndIf
+  If color=5 Then 
+    pot=70
+    grados=150 '140 
+    giromIzqGrad()
+    giromizq3()
+    Motor.Stop("B","TRUE")
+    Motor.StartPower("D",-80)
+    Program.Delay(650)
+    Motor.Stop("D","TRUE")
+    If EV3.BatteryLevel > 85 Then
+      grados=220
+    Else
+      grados=230 '285 'marcador6
+    EndIf
+    seg2grad()
+    Motor.Stop("BC","TRUE")
+    err=0
+    errold=0
+    pot=-70
+    grados=450
+    giromDerGrad()
+    Motor.Start("BC",-50)
+    Program.Delay(350)
+    Motor.Stop("BC","TRUE")
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",40,255,"TRUE")
+    Else
+      Motor.MovePower("BC",40,265,"TRUE")
+    EndIf
+    Motor.StartPower("D",80)
+    Program.Delay(625)
+    Motor.Stop("D","TRUE")
+  ElseIf color=3 Then
+    pot=70
+    grados=150 '140
+    giromDerGrad()
+    giromder2()
+    Motor.Stop("C","TRUE")
+    If EV3.BatteryLevel > 85 Then
+      grados=325
+    Else
+      grados=345
+    EndIf
+    seg2grad()
+    Motor.Stop("BC","TRUE")
+    err=0
+    errold=0
+    pot=-70
+    grados=500 '480
+    giromIzqGrad()
+    Motor.Start("BC",-50)
+    Program.Delay(350)
+    Motor.Stop("BC","TRUE")
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",40,245,"TRUE")
+    Else 
+      Motor.MovePower("BC",40,265,"TRUE") '265
+    EndIf
+    Motor.StartPower("D",80)
+    Program.Delay(625)
+    Motor.Stop("D","TRUE")
+    'Motor.Start("D",40)
+  EndIf
+EndSub
+
+'/////////////////////////////////////////////////////////////////////////////////////
+
+Sub Primer_3_5
+  pot=70
+  If con_1="TRUE" Then
+    If contenedor1="TRUE" Then
+      adelante="TRUE"
+    Else
+      adelante="FALSE"
+    EndIf
+  ElseIf con_2="TRUE" Then
+    adelante="FALSE"
+  ElseIF con_3="TRUE" Then
+    If contenedor4="TRUE" Then 
+      adelante="TRUE"
+    Else
+      adelante="FALSE"
+    EndIf
+  EndIf
+  LCD.Clear()
+  LCD.Text(1,30,60,2,adelante)
+  
+  kd=15
+  If adelante="TRUE" then 'Tomar Pieza 1 o 2
+    seg2()
+  Else
+    seg2()
+    grados=100
+    seg2grad()
+    seg2()
+  EndIf
+  kd=10
+  If color=3 Then
+    If EV3.BatteryLevel > 85 Then
+      grados=545
+    Else
+      grados=565
+    EndIf
+    seg2grad()
+    Motor.StartPower("BC",-50)
+    Program.Delay(90)
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+  Else
+    If EV3.BatteryLevel > 85 Then
+      grados=10
+    Else
+      grados=20
+    EndIf
+    seg2grad()
+    Motor.StartPower("BC",-30)
+    Program.Delay(80)
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+  EndIf
+  
+  pot=-70
+  If color=5 Then
+    grados=400 '350
+  Else
+    grados=520
+  EndIf
+  giromIzqGrad()
+  Motor.Start("BC",-50)
+  Program.Delay(350)
+  Motor.Stop("BC","TRUE")
+  If color=5 Then
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",50,235,"TRUE") '265
+    Else
+      Motor.MovePower("BC",50,255,"TRUE")
+    EndIf
+  Else
+    If EV3.BatteryLevel > 85 Then
+      Motor.MovePower("BC",50,245,"TRUE") '265
+    Else
+      Motor.MovePower("BC",50,265,"TRUE")
+    EndIf
+  EndIf
+  
+  Motor.StartPower("D",80)
+  Program.Delay(315)
+  Motor.Stop("D","TRUE")
+EndSub
+
+'____________________SUB INICIO___________________
+'______________________________________SALIDA
+
+Motor.Stop("ABCD","TRUE")
+
+If Sensor.ReadPercent(4) = 0 Then
+  If Sensor.ReadPercent(3) > targeti Then
+    contenedor1="TRUE"
+    contenedor2="FALSE"
+    contenedor3="TRUE"
+    contenedor4="TRUE"
+    pos=2
+  Else
+    contenedor1="FALSE"
+    contenedor2="TRUE"
+    contenedor3="TRUE"
+    contenedor4="TRUE"
+    pos=1
+  EndIf
+Else
+  If Sensor.ReadPercent(2) < targetd Then
+    contenedor1="TRUE"
+    contenedor2="TRUE"
+    contenedor3="TRUE"
+    contenedor4="FALSE"
+    pos=4
+  Else
+    contenedor1="TRUE"
+    contenedor2="TRUE"
+    contenedor3="FALSE"
+    contenedor4="TRUE"
+    pos=3
+  EndIf
+EndIf
+
+Thread.Run = SubirGarra
+
+LCD.Clear()
+LCD.Text(1,30,30,2,pos)
+
+If contenedor3="FALSE" Or contenedor4="FALSE" Then
+  Motor.StartPower("B",-85)
+  Motor.StartPower("C",-65)
+  Program.Delay(1400)
+  Motor.Stop("BC","TRUE")
+  Motor.StartPower("B",100)
+  Program.Delay(900)
+Else
+  If EV3.BatteryLevel > 85 Then
+    Motor.MovePower("BC",70,435,"TRUE")
+  Else
+    Motor.MovePower("BC",70,470,"TRUE")    
+  EndIf
+  grados=750
+  Motor.ResetCount("C")
+  While Motor.GetCount("C") < grados 
+    Motor.StartPower("B",15)
+    Motor.StartPower("C",100)
+  EndWhile
+  Motor.StartPower("B",-25)
+  Motor.StartPower("C",-100)
+  Program.Delay(100)
+  Motor.Stop("BC","TRUE")
+EndIf
+
+grados= 1000 '565
+Motor.ResetCount("BC")
+
+While Math.Abs(Motor.GetCount("B")) < grados
+  Motor.StartPower("B",85)
+  Motor.StartPower("C",75)
+EndWhile
+
+While Sensor.ReadPercent(2)<targeti or Sensor.ReadPercent(3)<targetd
+  Motor.StartPower("B",85)
+  Motor.StartPower("C",65)
+EndWhile
+
+While Sensor.ReadPercent(2)>targeti and Sensor.ReadPercent(3)>targetd
+  Motor.StartPower("B",85)
+  Motor.StartPower("C",65)
+EndWhile
+
+
+If contenedor1="TRUE" then 'Tomar Pieza 1 o 2
+  Motor.StartPower("B",-85)
+  Motor.StartPower("C",-65)
+  Program.Delay(100)
+  Motor.Stop("BC","TRUE")
+  Program.Delay(300)
+  Motor.MovePower("BC",-70,180,"TRUE")
+Else
+  grados= 610 '565
+  Motor.ResetCount("BC")
+  While Math.Abs(Motor.GetCount("B")) < grados
+    Motor.StartPower("B",85)
+    Motor.StartPower("C",65)
+  EndWhile
+EndIf
+Motor.StartPower("BC",-50)
+Motor.Stop("BC", "TRUE")
+Program.Delay(90)
+Motor.Stop("BC","TRUE")
+Program.Delay(200)
+err=0
+errold=0
+
+Motor.StartPower("B",-80)
+Program.Delay(1300)
+Motor.Stop("B","TRUE")
+Program.Delay(200)
+
+If contenedor1="TRUE" then 'Tomar Pieza 1 o 2
+  Motor.MovePower("BC",30,310,"TRUE")
+Else
+  Motor.MovePower("BC",30,430,"TRUE")
+EndIf
+
+Motor.Stop("BC","TRUE")
+Program.Delay(100)
+
+Motor.StartPower("D",-80)
+Program.Delay(350)
+Thread.Run = Cerrar_Comida
+Program.Delay(300)
+Motor.Stop("D","TRUE")
+
+LecturaPiezas()
+LCD.Clear()
+LCD.Text(1,30,30,2,color)
+Program.Delay(100)
+
+con_1="TRUE"
+con_2="FALSE"
+con_3="FALSE"
+
+If color=3 Or color=5 Then'va a verde o rojo
+  If contenedor1="TRUE" then 
+    Motor.MoveSync("BC",50,85,1100,"FALSE")
+    While Sensor.ReadPercent(2)>targetd Or Sensor.ReadPercent(3)>targeti
+      Motor.Start("B",50)
+      Motor.Start("C",85)
+    EndWhile
+  Else
+    Motor.MoveSync("BC",35,85,850,"FALSE")
+    Motor.MoveSync("BC",60,60,1000,"FALSE")
+    While Sensor.ReadPercent(2)>targetd Or Sensor.ReadPercent(3)>targeti
+      Motor.Start("BC",50)
+    EndWhile
+  EndIf
+Else '9999999999 va a azul o amarillo
+  While Sensor.ReadPercent(2)>targetd
+    Motor.StartPower("BC",-60)
+  EndWhile
+  Motor.Stop("BC","TRUE")
+  Motor.Stop("D","TRUE")
+  Program.Delay(200)
+  
+  pot=60
+  grados=180
+  giromDerGrad()
+  giromder2()
+  Motor.Stop("C","TRUE")
+  Program.Delay(200)
+  'aqui esta bien
+  
+  Primer_4_2()
+EndIf
+
+Contenedor_1_2Color_3_5()
+
+Motor.StartPower("D",80)
+Program.Delay(315)
+Motor.Stop("D","TRUE")
+'hasta aquì
+'___________________________________________RECORRIDO A BARCOS 1
+
+RecorridoBarcosYBarcos()
+
+'_________________________________________________REGRESO BARCOS 1
+If contenedor2="TRUE" And contenedor1="TRUE" Then          'Va por contenedor2
+  'Speaker.Note(100,"C4",100)
+  RegresoBarcos_1_2()
+Else '__________________________________'Va por contenedor3
+  'Speaker.Note(100,"C4",10000)
+  RegresoBarcos_3_4()
+EndIf
+
+pos_barco=0
+
+'Ir por segundo contenedor
+If Contenedor2="TRUE" And Contenedor1="TRUE" Then 'Tomar contenedor 2
+  While Sensor.ReadPercent(3) > targeti
+    Motor.StartPower("B",50)
+    Motor.StartPower("C",60)
+  EndWhile
+  Motor.Start("BC",-80)
+  Program.Delay(90)
+  Motor.Stop("BC","TRUE")
+  Program.Delay(200)
+  
+  Motor.MovePower("BC",-40,20,"TRUE")
+  
+  Motor.MovePower("C",-80,500,"TRUE")  'marcador4
+  Motor.StartPower("C",-80)
+  Program.Delay(250)
+  Motor.Stop("C","FALSE")
+  Program.Delay(200)
+  Motor.MovePower("BC",30,450,"TRUE")
+  
+  Program.Delay(100)
+  
+  Motor.StartPower("D",-80)
+  Program.Delay(350)
+  Thread.Run = Cerrar_Comida
+  Program.Delay(300)
+  Motor.Stop("D","TRUE")
+  
+  LecturaPiezas()
+  LCD.Clear()
+  LCD.Text(1,30,30,2,color)
+  Program.Delay(100)
+  
+  con_1="FALSE"
+  con_2="TRUE"
+  con_3="FALSE"
+  
+  If color=3 Or color=5 Then'va a verde o rojo
+    Motor.MoveSync("BC",35,85,850,"FALSE")
+    Motor.MoveSync("BC",60,60,1000,"FALSE")
+    While Sensor.ReadPercent(2)>targetd Or Sensor.ReadPercent(3)>targeti
+      Motor.Start("BC",50)
+    EndWhile
+  Else '9999999999 va a azul o amarillo
+    While Sensor.ReadPercent(2)>targetd
+      Motor.StartPower("BC",-50)
+    EndWhile
+    Motor.MovePower("BC",-60,20,"TRUE")
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    
+    pot=50
+    grados=180
+    giromDerGrad()
+    giromder2()
+    Motor.Stop("C","TRUE")
+    Program.Delay(200)
+    
+    Primer_4_2()
+  EndIf
+  Contenedor_1_2Color_3_5()
+  
+Else      'Tomar contenedor 3
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",60)
+    Motor.StartPower("C",50)
+  EndWhile
+  Motor.Start("BC",-80)
+  Program.Delay(90)
+  Motor.Stop("BC","TRUE")
+  Program.Delay(200)
+  Motor.MovePower("BC",-40,150,"TRUE") 'Checar
+  
+  Motor.StartPower("B",-80)
+  Program.Delay(1300)
+  Motor.Stop("B","TRUE")
+  Program.Delay(200)
+  
+  Motor.MovePower("BC",30,400,"TRUE")
+  Program.Delay(100)
+  
+  Motor.StartPower("D",-80)
+  Program.Delay(350)
+  Thread.Run = Cerrar_Comida
+  Program.Delay(300)
+  Motor.Stop("D","TRUE")
+  
+  LecturaPiezas()
+  LCD.Clear()
+  LCD.Text(1,30,30,2,color)
+  Program.Delay(100)
+  
+  con_1="FALSE"
+  con_2="TRUE"
+  con_3="FALSE"
+  
+  If color=2 Or color=4 Then        'va a azul o amarillo
+    Thread.Run = SubirGarra
+    Motor.MovePower("BC",80,1100,"FALSE") 'Checar
+    While Sensor.ReadPercent(2) > targetd
+      Motor.StartPower("BC",60)
+    EndWhile
+    Motor.Stop("BC","TRUE")
+    Motor.MovePower("C",-70,80,"TRUE")    'Checkpoint
+    Motor.MovePower("B",70,450,"TRUE")
+    Thread.Run = BajarGarra
+    Primer_4_2()
+  Else  
+    While Sensor.ReadPercent(2)>targetd
+      Motor.StartPower("BC",-50)
+    EndWhile
+    Motor.MovePower("BC",-20,40,"TRUE") '60
+    Motor.Stop("BC","TRUE")
+    Program.Delay(200)
+    pot=60
+    grados=180
+    giromIzqGrad()
+    giromizq3()
+    Motor.Stop("B","TRUE")
+    Program.Delay(200)
+    Primer_3_5()
+  EndIf
+EndIf
+
+Motor.StartPower("D",80)
+Program.Delay(315)
+Motor.Stop("D","TRUE")
+
+
+'___________________________________________RECORRIDO A BARCOS 2
+
+RecorridoBarcosYBarcos()
+
+'____________________________________________________REGRESO BARCOS 2
+
+RegresoBarcos_3_4()
+
+pos_barco=0
+'______________________________________________________________________________________
+'Ir por tercer contenedor
+If contenedor4="TRUE" Then
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",60)
+    Motor.StartPower("C",50)
+  EndWhile
+  Motor.MoveSync("BC",60,50,730,"TRUE") 'CHECAR
+Else
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",60)
+    Motor.StartPower("C",50)
+  EndWhile
+  Motor.Start("BC",-80)
+  Program.Delay(90)
+  Motor.Stop("BC","TRUE")
+  Program.Delay(200)
+  Motor.MovePower("BC",-40,150,"TRUE") 'CHECAR
+EndIf
+
+Motor.StartPower("B",-80)
+Program.Delay(1500)
+Motor.Stop("B","TRUE")
+Program.Delay(200)
+
+If contenedor4="TRUE" Then
+  Motor.MovePower("BC",30,450,"TRUE")
+Else
+  Motor.MovePower("BC",30,400,"TRUE") 'CHECAR... YA
+EndIf
+
+Program.Delay(100)
+
+Motor.StartPower("D",-80)
+Program.Delay(350)
+Thread.Run = Cerrar_Comida
+Program.Delay(300)
+Motor.Stop("D","TRUE")
+
+
+LecturaPiezas()
+LCD.Clear()
+LCD.Text(1,30,30,2,color)
+Program.Delay(100)
+
+con_1="FALSE"
+con_2="FALSE"
+con_3="TRUE"
+
+If color=2 Or color=4 Then        'va a azul o amarillo
+  Thread.Run = SubirGarra
+  Motor.MovePower("BC",80,1100,"FALSE") 'Checar
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("BC",60)
+  EndWhile
+  Motor.Stop("BC","TRUE")
+  Motor.MovePower("C",-70,80,"TRUE")    'Checkpoint
+  Motor.MovePower("B",70,450,"TRUE")
+  Thread.Run = BajarGarra
+  Primer_4_2()
+Else  
+  While Sensor.ReadPercent(2)>targetd
+    Motor.StartPower("BC",-50)
+  EndWhile
+  Motor.MovePower("BC",-20,40,"TRUE") '60
+  Motor.Stop("BC","TRUE")
+  Program.Delay(200)
+  pot=60
+  grados=180
+  giromIzqGrad()
+  giromizq3()
+  Motor.Stop("B","TRUE")
+  Program.Delay(200)
+  Primer_3_5()
+EndIf
+
+Motor.StartPower("D",80)
+Program.Delay(315)
+Motor.Stop("D","TRUE")
+'___________________________________________RECORRIDO A BARCOS 3
+
+RecorridoBarcosYBarcos()
+
+'_________________________________________________REGRESO FINAL
+If pos_barco <=3 Then
+  RegresoBarcos_3_4()
+  Motor.ResetCount("B")
+  
+  While Motor.GetCount("B") < 1600
+    Motor.StartPower("B",90)
+    Motor.StartPower("C",80)
+  EndWhile
+  
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",90)
+    Motor.StartPower("C",80)
+  EndWhile
+  
+  Motor.ResetCount("B")
+  While Motor.GetCount("B") < 500
+    Motor.StartPower("B",90)
+    Motor.StartPower("C",80)
+  EndWhile
+  
+  Motor.MoveSync("BC",50,100,950,"TRUE")
+  
+  Motor.ResetCount("B")
+  While Motor.GetCount("B") < 300
+    Motor.StartPower("B",90)
+    Motor.StartPower("C",80)
+  EndWhile
+  
+Else
+  RegresoBarcos_1_2()
+  Motor.ResetCount("C")
+  
+  While Motor.GetCount("C") < 1600
+    Motor.StartPower("B",80)
+    Motor.StartPower("C",90)
+  EndWhile
+  
+  While Sensor.ReadPercent(2) > targetd
+    Motor.StartPower("B",80)
+    Motor.StartPower("C",90)
+  EndWhile
+  
+  Motor.ResetCount("C")
+  While Motor.GetCount("C") < 500
+    Motor.StartPower("B",80)
+    Motor.StartPower("C",90)
+  EndWhile
+  
+  Motor.MoveSync("BC",100,50,950,"TRUE")
+  
+  Motor.ResetCount("C")
+  While Motor.GetCount("C") < 300
+    Motor.StartPower("B",80)
+    Motor.StartPower("C",90)
+  EndWhile
+EndIf
+
+Motor.Stop("ABCD","TRUE")
